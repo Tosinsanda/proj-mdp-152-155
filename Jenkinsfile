@@ -24,6 +24,16 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying to Tomcat server...'
+                sh """
+                    scp -i ~/Downloads/Saturday.pem target/JavaCalculator.war ec2-user@54.88.143.151:/tmp/
+                    ssh -i ~/Downloads/Saturday.pem ec2-user@54.88.143.151 'sudo mv /tmp/JavaCalculator.war /opt/tomcat/webapps/'
+                """
+            }
+        }
     }
 }
 
