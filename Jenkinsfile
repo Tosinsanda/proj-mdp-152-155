@@ -34,13 +34,15 @@ pipeline {
                 echo '=== Reached Deploy Stage ==='
                 echo 'Deploying to Tomcat server...'
                 script {
-                    // Extract the WAR from the image
-                    sh 'docker create --name temp-container calculator-app'
-                    sh 'docker cp temp-container:/usr/local/tomcat/webapps/app.war ./app.war'
-                    sh 'docker rm temp-container'
+                    // Clean up old temp-container if it exists
+                    sh 'docker rm -f temp-container || true'
 
-                    // Deploy to Tomcat via SCP and SSH
+                    // Extract the WAR from the Docker image
                     sh """
+                        docker create --name temp-container calculator-app
+                        docker cp temp-container:/usr/local/tomcat/webapps/WebAppCal-1.3.5.war ./app.war
+                        docker rm temp-container
+
                         scp -i ~/Downloads/Saturday.pem app.war ec2-user@13.218.200.87:/tmp/
                         ssh -i ~/Downloads/Saturday.pem ec2-user@13.218.200.87 'sudo mv /tmp/app.war /opt/tomcat/webapps/app.war'
                     """
