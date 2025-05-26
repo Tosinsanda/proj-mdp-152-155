@@ -25,12 +25,12 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy to Tomcat') {
             steps {
                 echo 'Deploying to Tomcat server...'
                 sh """
-                    scp -i ~/Downloads/Saturday.pem target/WebAppCal-1.3.5.war ec2-user@54.88.143.151:/tmp/
-                    ssh -i ~/Downloads/Saturday.pem ec2-user@54.88.143.151 'sudo mv /tmp/JavaCalculator.war /opt/tomcat/webapps/'
+                    scp -i ~/Downloads/Saturday.pem target/WebAppCal-1.3.5.war ec2-user@13.218.200.87:/tmp/
+                    ssh -i ~/Downloads/Saturday.pem ec2-user@13.218.200.87 'sudo mv /tmp/WebAppCal-1.3.5.war /opt/tomcat/webapps/app.war'
                 """
             }
         }
