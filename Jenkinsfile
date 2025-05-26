@@ -20,7 +20,11 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
-                    docker.image('calculator-app').run('-p 8080:8080')
+                    sh """
+                        docker stop calc-app || true
+                        docker rm calc-app || true
+                        docker run -d -p 9090:8080 --name calc-app calculator-app
+                    """
                 }
             }
         }
