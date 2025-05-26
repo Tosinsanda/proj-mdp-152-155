@@ -43,8 +43,8 @@ pipeline {
                         docker cp temp-container:/usr/local/tomcat/webapps/WebAppCal-1.3.5.war ./app.war
                         docker rm temp-container
 
-                        scp -i ~/Downloads/Saturday.pem app.war ec2-user@13.218.200.87:/tmp/
-                        ssh -i ~/Downloads/Saturday.pem ec2-user@13.218.200.87 'sudo mv /tmp/app.war /opt/tomcat/webapps/app.war'
+                        scp -i /var/lib/jenkins/.ssh/Saturday.pem app.war ec2-user@13.218.200.87:/tmp/
+                        ssh -i /var/lib/jenkins/.ssh/Saturday.pem ec2-user@13.218.200.87 'sudo mv /tmp/app.war /opt/tomcat/webapps/app.war'
                     """
                 }
             }
