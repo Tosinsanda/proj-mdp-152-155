@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        TOMCAT_IP = '3.83.119.255'
+        SSH_KEY = '/var/lib/jenkins/.ssh/Saturday.pem'
+    }
+
     stages {
         stage('Clone Repository') {
             steps {
@@ -12,6 +17,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
+                    echo 'Building Docker image for Calculator App...'
                     docker.build('calculator-app')
                 }
             }
@@ -20,6 +26,7 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
+                    echo 'Running Docker container for Calculator App...'
                     sh """
                         docker stop calc-app || true
                         docker rm calc-app || true
@@ -31,20 +38,20 @@ pipeline {
 
         stage('Deploy to Tomcat') {
             steps {
-                echo '=== Reached Deploy Stage ==='
-                echo 'Deploying to Tomcat server...'
                 script {
-                    // Clean up old temp-container if it exists
-                    sh 'docker rm -f temp-container || true'
+                    echo 'Packaging WAR file from Docker image...'
 
-                    // Extract the WAR from the Docker image
                     sh """
+                        docker rm -f temp-container || true
                         docker create --name temp-container calculator-app
                         docker cp temp-container:/usr/local/tomcat/webapps/WebAppCal-1.3.5.war ./app.war
                         docker rm temp-container
+                    """
 
-                        scp -i /var/lib/jenkins/.ssh/Saturday.pem app.war ec2-user@13.218.200.87:/tmp/
-                        ssh -i /var/lib/jenkins/.ssh/Saturday.pem ec2-user@13.218.200.87 'sudo mv /tmp/app.war /opt/tomcat/webapps/app.war'
+                    echo "Copying WAR to Tomcat server ($TOMCAT_IP)..."
+                    sh """
+                        scp -o StrictHostKeyChecking=no -i $SSH_KEY app.war ec2-user@$TOMCAT_IP:/tmp/
+                        ssh -o StrictHostKeyChecking=no -i $SSH_KEY ec2-user@$TOMCAT_IP 'sudo mv /tmp/app.war /opt/tomcat/webapps/app.war && sudo chown tomcat:tomcat /opt/tomcat/webapps/app.war'
                     """
                 }
             }
